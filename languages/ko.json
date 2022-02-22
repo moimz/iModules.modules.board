@@ -1,0 +1,13 @@
+{
+	"search":{
+		"title":"제목",
+		"author":"작성자"
+	},
+	"error":{
+		"FORBIDDEN":"권한이 없습니다.",
+		"FORBIDDEN_DETAIL":"[${code}] 권한이 부족합니다.",
+		"FORBIDDEN_CODE":{
+			"LIST":"게시물 목록보기"
+		}
+	}
+}
