@@ -36,7 +36,7 @@ class ModuleBoard extends Module {
 			return null;
 		}
 		
-		$board->templet_configs = json_decode($board->templet_configs);
+		$board->templet = json_decode($board->templet);
 		$board->use_prefix = $board->use_prefix == 'TRUE';
 		
 		self::$_boards[$board_id] = $board;
@@ -108,24 +108,6 @@ class ModuleBoard extends Module {
 
 		self::$_posts[$post->post_id] = $post;
 		return self::$_posts[$post->post_id];
-	}
-	
-	/**
-	 * 컨텍스트 설정과 게시판고유값으로 게시판의 템플릿 정보를 가져온다.
-	 *
-	 * @param string $board_id 게시판고유값
-	 * @param ?object $configs 컨텍스트 설정
-	 * @return ?object $templet 템플릿정보
-	 */
-	public function getBoardTemplet(string $board_id,?object $configs=null):?object {
-		$board = $this->getBoard($board_id);
-		if ($board === null) return null;
-		
-		$templet = new stdClass();
-		$templet->name = $configs?->templet ?? $board->templet;
-		$templet->configs = $configs?->templet_configs ?? $board->templet_configs;
-		
-		return $templet;
 	}
 	
 	/**
@@ -317,8 +299,8 @@ class ModuleBoard extends Module {
 			'<script>Board.list.init("ModuleBoardListForm");</script>'
 		);
 		
-		$templet = $this->getBoardTemplet($board_id,$configs);
-		return $this->getTemplet($templet->name,$templet->configs)->getContext('list',get_defined_vars(),$header,$footer);
+		$templet = isset($configs->templet) == true ? $configs->templet : $board->templet;
+		return $this->getTemplet($templet)->getContext('list',get_defined_vars(),$header,$footer);
 	}
 	
 	/**
@@ -437,8 +419,8 @@ class ModuleBoard extends Module {
 		}
 		*/
 		$header = $footer = '';
-		$templet = $this->getBoardTemplet($board_id,$configs);
-		return $this->getTemplet($templet->name,$templet->configs)->getContext('write',get_defined_vars(),$header,$footer);
+		$templet = isset($configs->templet) == true ? $configs->templet : $board->templet;
+		return $this->getTemplet($templet)->getContext('write',get_defined_vars(),$header,$footer);
 	}
 	
 	/**
