@@ -98,7 +98,7 @@ if (defined('__IM__') == false) exit;
 			</div>
 			<?php } ?>
 			
-			<input type="hidden" name="field1" value="<?php echo $post->field1 == 'TRUE' ? 'TRUE' : 'FALSE'; ?>">
+			<input type="hidden" name="field1" value="<?php echo $post?->field1 == 'TRUE' ? 'TRUE' : 'FALSE'; ?>">
 			<div data-role="input">
 				<label><input type="checkbox" name="field1_checked" value="TRUE"<?php echo $post?->field1 == 'TRUE' ? ' checked="checked"' : ''; ?>>고객문의 페이지에 공지사항으로 표시합니다.</label>
 			</div>
