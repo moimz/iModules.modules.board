@@ -7,14 +7,9 @@
  * @file /modules/board/Board.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2022. 12. 1.
+ * @modified 2023. 4. 10.
  */
 namespace modules\board;
-use \Html;
-use \Modules;
-use \ErrorData;
-use \ErrorHandler;
-use \Request;
 class Board extends \Module
 {
     /**
@@ -50,7 +45,7 @@ class Board extends \Module
             ->where('board_id', $board_id)
             ->getOne();
         if ($board === null) {
-            ErrorHandler::print($this->error('NOT_FOUND_BOARD', $board_id));
+            \ErrorHandler::print($this->error('NOT_FOUND_BOARD', $board_id));
         }
 
         self::$_boards[$board_id] = new dto\Board($board, $this);
@@ -136,16 +131,16 @@ class Board extends \Module
     {
         $board = $this->getBoard($board_id);
         if ($board === null) {
-            return ErrorHandler::get('NOT_FOUND_BOARD', $board_id);
+            return \ErrorHandler::get('NOT_FOUND_BOARD', $board_id);
         }
 
         /**
          * 컨텍스트 템플릿을 설정한다.
          */
-        if ($configs?->templet == null || $configs?->templet == '#') {
-            $this->setTemplet($board->getTempletConfigs());
+        if ($configs?->template == null || $configs?->template == '#') {
+            $this->setTemplate($board->getTemplateConfigs());
         } else {
-            $this->setTemplet($configs->templet);
+            $this->setTemplate($configs->template);
         }
 
         $content = '';
@@ -165,7 +160,7 @@ class Board extends \Module
                 break;
 
             default:
-                $content .= ErrorHandler::get($this->error('NOT_FOUND_CONTEXT', $this->getRoute()->getPath(true)));
+                $content .= \ErrorHandler::get($this->error('NOT_FOUND_CONTEXT'));
         }
 
         return $content;
@@ -182,13 +177,13 @@ class Board extends \Module
     {
         $board = $this->getBoard($board_id);
         if ($board->checkPermission('LIST') == false) {
-            return ErrorHandler::get($this->error('FORBIDDEN', 'LIST'));
+            return \ErrorHandler::get($this->error('FORBIDDEN', 'LIST'));
         }
 
         /**
          * 로봇 메타 설정
          */
-        Html::robots('noindex, follow');
+        \Html::robots('noindex, follow');
 
         $category_id = $configs?->category ?? 0;
         $category_id = $category_id === 0 ? null : $category_id;
@@ -271,8 +266,8 @@ class Board extends \Module
         /**
          * 일반 게시물을 가져온다.
          */
-        $key = Request::get('key') ?? 'title';
-        $keyword = Request::get('keyword') ?? '';
+        $key = \Request::get('key') ?? 'title';
+        $keyword = \Request::get('keyword') ?? '';
         $posts = $this->db()
             ->select()
             ->from($this->table('posts'))
@@ -309,10 +304,10 @@ class Board extends \Module
         /**
          * 템플릿파일을 호출한다.
          */
-        $header = Html::tag('<form id="ModuleBoardListForm">');
-        $footer = Html::tag('</form>'); //, '<script>Board.list.init("ModuleBoardListForm");</script>');
+        $header = \Html::tag('<form id="ModuleBoardListForm">');
+        $footer = \Html::tag('</form>'); //, '<script>Board.list.init("ModuleBoardListForm");</script>');
 
-        return $this->getTemplet()
+        return $this->getTemplate()
             ->assign([
                 'board' => $board,
                 'notices' => $notices,
@@ -336,13 +331,13 @@ class Board extends \Module
     {
         $board = $this->getBoard($board_id);
         if ($board->checkPermission('POST_WRITE') == false) {
-            return ErrorHandler::get($this->error('FORBIDDEN', 'LIST'));
+            return \ErrorHandler::get($this->error('FORBIDDEN', 'LIST'));
         }
 
         /**
          * 로봇 메타 설정
          */
-        Html::robots('noindex, follow');
+        \Html::robots('noindex, follow');
 
         $category_id = $configs->category ?? 0;
         $category_id = $category_id === 0 ? null : $category_id;
@@ -356,7 +351,7 @@ class Board extends \Module
         /**
          * @var \modules\member\Module $mMember 회원모듈
          */
-        $mMember = Modules::get('member');
+        $mMember = \Modules::get('member');
         $member = $mMember->getMember();
 
         $post = null;
@@ -367,27 +362,27 @@ class Board extends \Module
                 $post->getBoardId() != $board_id ||
                 ($category_id !== null && $post->getCategoryId() !== 0 && $post->getCategoryId() != $category_id)
             ) {
-                return ErrorHandler::get($this->error('NOT_FOUND_POST'));
+                return \ErrorHandler::get($this->error('NOT_FOUND_POST'));
             }
 
             if ($board->checkPermission('POST_MODIFY') == false && $post->getAuthor()->getId() != $member->getId()) {
-                return ErrorHandler::get($this->error('FORBIDDEN', 'POST_MODIFY'));
+                return \ErrorHandler::get($this->error('FORBIDDEN', 'POST_MODIFY'));
             }
         }
 
         /**
          * @var \modules\wysiwyg\Module $mWysiwyg 위지윅모듈
          */
-        $mWysiwyg = Modules::get('wysiwyg');
+        $mWysiwyg = \Modules::get('wysiwyg');
         $wysiwyg = $mWysiwyg->setName('content');
 
         /**
          * 템플릿파일을 호출한다.
          */
-        $header = Html::tag('<form id="ModuleBoardWriteForm">');
-        $footer = Html::tag('</form>'); //, '<script>Board.write.init("ModuleBoardWriteForm");</script>');
+        $header = \Html::tag('<form id="ModuleBoardWriteForm">');
+        $footer = \Html::tag('</form>'); //, '<script>Board.write.init("ModuleBoardWriteForm");</script>');
 
-        return $this->getTemplet()
+        return $this->getTemplate()
             ->assign([
                 'board' => $board,
                 'category_id' => $category_id,
@@ -407,14 +402,14 @@ class Board extends \Module
      * @param ?object $details 에러와 관련된 추가정보
      * @return \ErrorData $error
      */
-    public function error(string $code, ?string $message = null, ?object $details = null): ErrorData
+    public function error(string $code, ?string $message = null, ?object $details = null): \ErrorData
     {
         switch ($code) {
             /**
              * 게시판이 존재하지 않는 경우
              */
             case 'NOT_FOUND_BOARD':
-                $error = ErrorHandler::data();
+                $error = \ErrorHandler::data();
                 $error->message = $this->getErrorText('NOT_FOUND_BOARD', ['board_id' => $message]);
                 return $error;
 
@@ -422,7 +417,7 @@ class Board extends \Module
              * URL 경로가 존재하지 않는 경우
              */
             case 'NOT_FOUND_CONTEXT':
-                $error = ErrorHandler::data();
+                $error = \ErrorHandler::data();
                 $error->message = $this->getErrorText('NOT_FOUND_CONTEXT');
                 $error->suffix = $message;
                 return $error;
@@ -432,11 +427,11 @@ class Board extends \Module
              * 그렇지 않은 경우 권한이 부족하다는 에러메시지를 표시한다.
              */
             case 'FORBIDDEN':
-                $error = ErrorHandler::data();
+                $error = \ErrorHandler::data();
                 /**
                  * @var ModuleMember $mMember
                  */
-                $mMember = Modules::get('member');
+                $mMember = \Modules::get('member');
                 if ($mMember->isLogged() == true) {
                     $error->prefix = $this->getErrorText('FORBIDDEN');
                     $error->message = $this->getErrorText('FORBIDDEN_DETAIL', [
