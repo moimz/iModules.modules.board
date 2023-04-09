@@ -28,9 +28,9 @@ class Board
     private string $_title;
 
     /**
-     * @var object $_templet 게시판 설정에 따른 템플릿 정보
+     * @var object $_template 게시판 설정에 따른 템플릿 정보
      */
-    private object $_templet;
+    private object $_template;
 
     /**
      * @var string 카테고리 사용여부 (NONE : 사용안함, USED : 사용함, FORCE : 항상 사용함)
@@ -93,7 +93,7 @@ class Board
 
         $this->_id = $board->board_id;
         $this->_title = $board->title;
-        $this->_templet = json_decode($board->templet);
+        $this->_template = json_decode($board->template);
 
         $this->_category_type = $board->category_type;
 
@@ -136,11 +136,11 @@ class Board
     /**
      * 게시판 기본 템플릿설정을 가져온다.
      *
-     * @return \Templet $templet
+     * @return \Template $template
      */
-    public function getTempletConfigs(): object
+    public function getTemplateConfigs(): object
     {
-        return $this->_templet;
+        return $this->_template;
     }
 
     /**
