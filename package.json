@@ -1,6 +1,6 @@
 {
     "id": "tools.moimz.imodules.modules.board",
-    "icon": "xi-crown",
+    "icon": "xi xi-paper",
     "title": {
         "ko": "게시판"
     },
@@ -19,9 +19,24 @@
     },
     "language": "ko",
     "configs": {
-        "templet": {
-            "type": "templet",
-            "default": "default"
+        "defaults": {
+            "type": "fieldset",
+            "label": {
+                "ko": "기본설정"
+            },
+            "items": {
+                "template": {
+                    "type": "template",
+                    "label": {
+                        "ko": "기본템플릿"
+                    },
+                    "target": {
+                        "type": "module",
+                        "name": "board"
+                    },
+                    "default": "default"
+                }
+            }
         }
     }
 }
