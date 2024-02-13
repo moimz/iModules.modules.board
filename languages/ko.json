@@ -4,12 +4,17 @@
         "content": "제목+내용",
         "author": "작성자"
     },
-    "error": {
+    "errors": {
         "NOT_FOUND_BOARD": "${board_id} 게시판이 존재하지 않습니다.",
         "FORBIDDEN": "권한이 없습니다.",
         "FORBIDDEN_DETAIL": "[${code}] 권한이 부족합니다.",
         "FORBIDDEN_CODE": {
             "LIST": "게시물 목록보기"
+        }
+    },
+    "admin": {
+        "configs": {
+            "attachment_template": "업로더템플릿"
         }
     }
 }

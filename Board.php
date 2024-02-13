@@ -28,6 +28,63 @@ class Board extends \Module
     private static array $_posts = [];
 
     /**
+     * 모듈의 컨텍스트 목록을 가져온다.
+     *
+     * @return array $contexts 컨텍스트목록
+     */
+    public function getContexts(): array
+    {
+        $contexts = [];
+        $boards = $this->db()
+            ->select(['board_id', 'title'])
+            ->from($this->table('boards'))
+            ->orderBy('board_id', 'ASC')
+            ->get();
+        foreach ($boards as $board) {
+            $contexts[] = ['name' => $board->board_id, 'title' => $board->title . '(' . $board->board_id . ')'];
+        }
+        return $contexts;
+    }
+
+    /**
+     * 모듈의 컨텍스트 설정필드를 가져온다.
+     *
+     * @return array $context 컨텍스트명
+     * @return array $fields 설정필드목록
+     */
+    public function getContextConfigsFields(string $context): array
+    {
+        $fields = [];
+        $template = [
+            'name' => 'template',
+            'label' => $this->getText('template'),
+            'type' => 'template',
+            'component' => [
+                'type' => 'module',
+                'name' => $this->getName(),
+                'use_default' => true,
+            ],
+            'value' => 'default',
+        ];
+        $fields[] = $template;
+
+        $attachment = [
+            'name' => 'attachment',
+            'label' => $this->getText('admin.configs.attachment_template'),
+            'type' => 'template',
+            'component' => [
+                'type' => 'module',
+                'name' => 'attachment',
+                'use_default' => true,
+            ],
+            'value' => 'default',
+        ];
+        $fields[] = $attachment;
+
+        return $fields;
+    }
+
+    /**
      * 게시판 정보를 가져온다.
      *
      * @param string $board_id 게시판고유값
