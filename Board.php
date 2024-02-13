@@ -7,23 +7,23 @@
  * @file /modules/board/Board.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2023. 4. 10.
+ * @modified 2024. 2. 14.
  */
 namespace modules\board;
 class Board extends \Module
 {
     /**
-     * @var dto\Board[] $_boards 게시판 정보를 저장한다.
+     * @var \modules\board\dtos\Board[] $_boards 게시판 정보를 저장한다.
      */
     private static array $_boards = [];
 
     /**
-     * @var dto\Category[] $_categories 카테고리 정보를 저장한다.
+     * @var \modules\board\dtos\Category[] $_categories 카테고리 정보를 저장한다.
      */
     private static array $_categories = [];
 
     /**
-     * @var dto\Post[] $_posts 게시물 정보를 저장한다.
+     * @var \modules\board\dtos\Post[] $_posts 게시물 정보를 저장한다.
      */
     private static array $_posts = [];
 
@@ -31,9 +31,9 @@ class Board extends \Module
      * 게시판 정보를 가져온다.
      *
      * @param string $board_id 게시판고유값
-     * @return dto/Board $board 게시판정보
+     * @return \modules\board\dtos\Board $board 게시판정보
      */
-    public function getBoard(string $board_id): dto\Board
+    public function getBoard(string $board_id): \modules\board\dtos\Board
     {
         if (isset(self::$_boards[$board_id]) == true) {
             return self::$_boards[$board_id];
@@ -48,7 +48,7 @@ class Board extends \Module
             \ErrorHandler::print($this->error('NOT_FOUND_BOARD', $board_id));
         }
 
-        self::$_boards[$board_id] = new dto\Board($board, $this);
+        self::$_boards[$board_id] = new \modules\board\dtos\Board($board, $this);
         return self::$_boards[$board_id];
     }
 
@@ -56,9 +56,9 @@ class Board extends \Module
      * 카테고리 정보를 가져온다.
      *
      * @param int|object $category_id 카테고리고유값
-     * @return ?dto\Category $category 카테고리정보
+     * @return ?\modules\board\dtos\Category $category 카테고리정보
      */
-    public function getCategory(int|object $category_id): ?dto\Category
+    public function getCategory(int|object $category_id): ?\modules\board\dtos\Category
     {
         if (is_object($category_id) == true) {
             $category = $category_id;
@@ -80,7 +80,7 @@ class Board extends \Module
         if ($category === null) {
             self::$_categories[$category_id] = null;
         } else {
-            self::$_categories[$category_id] = new dto\Category($category);
+            self::$_categories[$category_id] = new \modules\board\dtos\Category($category);
         }
 
         return self::$_categories[$category_id];
@@ -90,9 +90,9 @@ class Board extends \Module
      * 게시물 정보를 가져온다.
      *
      * @param int|object $post_id 게시물고유값
-     * @return ?dto\Post $post 게시물정보
+     * @return ?\modules\board\dtos\Post $post 게시물정보
      */
-    public function getPost(int|object $post_id): ?dto\Post
+    public function getPost(int|object $post_id): ?\modules\board\dtos\Post
     {
         if (is_object($post_id) == true) {
             $post = $post_id;
@@ -114,7 +114,7 @@ class Board extends \Module
         if ($post === null) {
             self::$_posts[$post_id] = null;
         } else {
-            self::$_posts[$post_id] = new dto\Post($post);
+            self::$_posts[$post_id] = new \modules\board\dtos\Post($post);
         }
 
         return self::$_posts[$post_id];

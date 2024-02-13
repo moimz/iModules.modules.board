@@ -4,12 +4,12 @@
  *
  * 게시판 말머리 구조체를 정의한다.
  *
- * @file /modules/board/dto/Prefix.php
+ * @file /modules/board/dtos/Prefix.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2022. 12. 1.
+ * @modified 2024. 2. 14.
  */
-namespace modules\board\dto;
+namespace modules\board\dtos;
 class Prefix
 {
     /**
@@ -49,7 +49,8 @@ class Prefix
      */
     public function __construct(object $prefix)
     {
-        $this->_category = $prefix;
+        $this->_prefix = $prefix;
+
         $this->_id = intval($prefix->prefix_id);
         $this->_board_id = $prefix->board_id;
         $this->_title = $prefix->title;

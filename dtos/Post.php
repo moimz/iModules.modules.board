@@ -4,12 +4,12 @@
  *
  * 게시판 게시물 구조체를 정의한다.
  *
- * @file /modules/board/dto/Post.php
+ * @file /modules/board/dtos/Post.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2022. 12. 1.
+ * @modified 2024. 2. 14.
  */
-namespace modules\board\dto;
+namespace modules\board\dtos;
 class Post
 {
     /**
@@ -50,7 +50,7 @@ class Post
     /**
      * @var \modules\member\dto\Member 작성자
      */
-    private \modules\member\dto\Member $_author;
+    private \modules\member\dtos\Member $_author;
 
     /**
      * @var int $_ment_count 댓글수
@@ -94,6 +94,8 @@ class Post
      */
     public function __construct(object $post)
     {
+        $this->_post = $post;
+
         $this->_id = intval($post->post_id);
         $this->_board_id = $post->board_id;
         $this->_category_id = $post->category_id;
@@ -167,7 +169,7 @@ class Post
      *
      * @return \modules\member\dto\Member $author
      */
-    public function getAuthor(): \modules\member\dto\Member
+    public function getAuthor(): \modules\member\dtos\Member
     {
         if (isset($this->_author) == true) {
             return $this->_author;

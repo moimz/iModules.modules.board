@@ -4,12 +4,12 @@
  *
  * 게시판 구조체를 정의한다.
  *
- * @file /modules/board/dto/Board.php
+ * @file /modules/board/dtos/Board.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2022. 12. 1.
+ * @modified 2024. 2. 14.
  */
-namespace modules\board\dto;
+namespace modules\board\dtos;
 class Board
 {
     /**
@@ -33,17 +33,12 @@ class Board
     private object $_template;
 
     /**
-     * @var string 카테고리 사용여부 (NONE : 사용안함, USED : 사용함, FORCE : 항상 사용함)
-     */
-    private string $_category_type;
-
-    /**
-     * @var dto\Category[] $_categories 게시판 카테고리
+     * @var \modules\board\dtos\Category[] $_categories 게시판 카테고리
      */
     private array $_categories;
 
     /**
-     * @var dto\Prefix[] $_prefixes 게시판 카테고리
+     * @var \modules\board\dtos\Prefix[] $_prefixes 게시판 카테고리
      */
     private array $_prefixes;
 
@@ -58,29 +53,19 @@ class Board
     private int $_ment_limit;
 
     /**
-     * @var int $_page_limit 페이지네비게이션당 페이지수
+     * @var int $_pagination_type 페이지네비게이션 타입 (LEFT : 현재페이지와 무관 시작페이지 고정, CENTER : 현재 페이지 기준 앞뒤 페이지 변경)
      */
-    private int $_page_limit;
+    private string $_pagination_type;
 
     /**
-     * @var string $_notice_type 공지사항 형태 (INCLUDE : 일반 게시물에 공지사항을 포함하여 페이징처리, FIRST : 첫페이지에만 표시, ALL : 전체 페이지에 노출)
+     * @var int $_posts 게시물수
      */
-    private string $_notice_type;
+    private int $_posts;
 
     /**
-     * @var int $_post_count 게시물수
+     * @var int $_ments 게시물수
      */
-    private int $_post_count;
-
-    /**
-     * @var int $_ment_count 게시물수
-     */
-    private int $_ment_count;
-
-    /**
-     * @var int $_notice_count 공지사항수
-     */
-    private int $_notice_count;
+    private int $_ments;
 
     /**
      * 게시판 구조체를 정의한다.
@@ -95,18 +80,12 @@ class Board
         $this->_title = $board->title;
         $this->_template = json_decode($board->template);
 
-        $this->_category_type = $board->category_type;
-
         $this->_post_limit = $board->post_limit;
         $this->_ment_limit = $board->ment_limit;
-        $this->_page_limit = $board->page_limit;
+        $this->_pagination_type = $board->pagination_type;
 
-        $this->_notice_type = $board->notice_type;
-        $this->_notice_category = $board->notice_category;
-
-        $this->_post_count = $board->post_count;
-        $this->_ment_count = $board->ment_count;
-        $this->_notice_count = $board->notice_count;
+        $this->_posts = $board->posts;
+        $this->_ments = $board->ments;
         /*
         $this->wysiwyg = json_decode($board->wysiwyg);
         $this->attachment = json_decode($board->attachment);
@@ -202,16 +181,6 @@ class Board
 
         $this->_prefixes = [];
         return $this->_prefixes;
-    }
-
-    /**
-     * 공지사항 형태를 가져온다.
-     *
-     * @return string $notice_type (INCLUDE : 일반 게시물에 공지사항을 포함하여 페이징처리, FIRST : 첫페이지에만 표시, ALL : 전체 페이지에 노출)
-     */
-    public function getNoticeType(): string
-    {
-        return $this->_notice_type;
     }
 
     /**

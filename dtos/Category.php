@@ -4,12 +4,12 @@
  *
  * 게시판 카테고리 구조체를 정의한다.
  *
- * @file /modules/board/dto/Category.php
+ * @file /modules/board/dtos/Category.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2022. 12. 1.
+ * @modified 2024. 2. 14.
  */
-namespace modules\board\dto;
+namespace modules\board\dtos;
 class Category
 {
     /**
@@ -50,6 +50,7 @@ class Category
     public function __construct(object $category)
     {
         $this->_category = $category;
+
         $this->_id = intval($category->category_id);
         $this->_board_id = $category->board_id;
         $this->_title = $category->title;
