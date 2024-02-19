@@ -1,0 +1,88 @@
+/**
+ * 이 파일은 아이모듈 게시판모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 기본 템플릿 - 스타일시트
+ *
+ * @file /modules/board/templates/default/styles/style.css
+ * @author Arzz <arzz@arzz.com>
+ * @license MIT License
+ * @modified 2024. 2. 19.
+ */
+div[data-role='module'][data-module='board'][data-template='default'] {
+    ul[data-role='list'] {
+        > li {
+            gap: 5px;
+
+            > span {
+                flex-shrink: 0;
+                flex-grow: 0;
+
+                &.loopnum {
+                    width: calc(var(--font-size-default) * 3);
+                }
+
+                &.title {
+                    flex-grow: 1;
+                }
+
+                &.author {
+                    width: calc(var(--font-size-default) * 8);
+                }
+
+                &.created_at {
+                    width: calc(var(--font-size-default) * 6);
+                }
+
+                &.hit {
+                    width: calc(var(--font-size-default) * 3);
+                    padding-right: 8px;
+                }
+            }
+
+            &.header {
+                > span {
+                    font-weight: bold;
+                    text-align: center;
+
+                    &.author {
+                        text-align: left;
+                    }
+                }
+            }
+
+            &.fixed,
+            &.notice {
+                background: var(--color-background-400);
+                > span {
+                }
+            }
+
+            &.post,
+            &.notice,
+            &.fixed {
+                > span {
+                    &.loopnum {
+                        text-align: center;
+                        font-size: var(--font-size-small);
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: calc(var(--font-size-default) / -24);
+                    }
+
+                    &.created_at {
+                        text-align: center;
+                        font-size: var(--font-size-small);
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: calc(var(--font-size-default) / -24);
+                    }
+
+                    &.hit {
+                        text-align: right;
+                        font-size: var(--font-size-small);
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: calc(var(--font-size-default) / -24);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,58 @@
+<?php
+/**
+ * 이 파일은 아이모듈 게시판모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 기본 템플릿 - 목록
+ *
+ * @file /modules/board/templates/default/contexts/list.html
+ * @author Arzz <arzz@arzz.com>
+ * @license MIT License
+ * @modified 2024. 2. 19.
+ *
+ * @var \modules\board\Board $me
+ * @var \modules\board\dtos\Board $board 게시판정보
+ * @var \modules\board\dtos\Post[] $notices 고정 공지사항 게시물
+ * @var \modules\board\dtos\Post[] $posts 일반 게시물
+ * @var string $key 검색대상
+ * @var string $keyword 검색어
+ * @var int? $category_id 현재 카테고리 고유값
+ * @var int? $post_id 현재 게시물 고유값 (게시물 보기인 경우)
+ */
+if (defined('__IM__') == false) {
+    exit();
+}
+?>
+<ul data-role="list">
+    <li class="header">
+        <span class="title"><?php echo $me->getText('posts.title'); ?></span>
+        <span class="author"><?php echo $me->getText('posts.author'); ?></span>
+        <span class="created_at"><?php echo $me->getText('posts.created_at'); ?></span>
+        <span class="hit"><?php echo $me->getText('posts.hit'); ?></span>
+    </li>
+    <?php foreach ($notices as $notice) { ?>
+    <li class="fixed">
+        <span class="loopnum"><?php echo $me->getText('lists.fixed'); ?></span>
+        <span class="title"><?php echo $notice->getTitle(); ?></span>
+        <span class="created_at"><?php echo $notice->getCreatedAt('Y.m.d','H:i:s'); ?></span>
+        <span class="hit"><?php echo Format::number($notice->getHit()); ?></span>
+    </li>
+    <?php } ?>
+    <?php foreach ($posts as $post) { ?>
+    <li class="<?php echo $post->isNotice() == true ? 'notice' : 'post'; ?>">
+        <span class="loopnum"><?php echo $post->getLoopnum(); ?></span>
+        <span class="title"><a href="<?php echo $post->getUrl(); ?>"><?php echo $post->getTitle(); ?></a></span>
+        <span class="author"><?php echo $post->getAuthor()->getNameTag(); ?></span>
+        <span class="created_at"><?php echo $post->getCreatedAt('Y.m.d','H:i:s'); ?></span>
+        <span class="hit"><?php echo Format::number($post->getHit()); ?></span>
+    </li>
+    <?php } ?>
+</ul>
+
+<?php
+// @todo 페이지네이션 및 검색
+?>
+
+<div data-role="buttons">
+    <span data-role="space"></span>
+    <a href="<?php echo $me->getUrl('write'); ?>" data-role="button" class="confirm"><?php echo $me->getText('buttons.write'); ?></a>
+</div>
