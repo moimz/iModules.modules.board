@@ -7,7 +7,7 @@
  * @file /modules/board/dtos/Post.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2024. 2. 14.
+ * @modified 2024. 2. 19.
  */
 namespace modules\board\dtos;
 class Post
@@ -48,19 +48,19 @@ class Post
     private int $_member_id;
 
     /**
-     * @var \modules\member\dto\Member 작성자
+     * @var \modules\board\dto\Author 작성자
      */
-    private \modules\member\dtos\Member $_author;
+    private \modules\board\dtos\Author $_author;
 
     /**
-     * @var int $_ment_count 댓글수
+     * @var int $_ments 댓글수
      */
-    private int $_ment_count;
+    private int $_ments;
 
     /**
-     * @var int $_latest_ment_at 마지막 댓글 작성일시
+     * @var int $_latest_ment 마지막 댓글 작성일시
      */
-    private int $_latest_ment_at;
+    private int $_latest_ment;
 
     /**
      * @var int $_good 추천수
@@ -73,9 +73,14 @@ class Post
     private int $_bad;
 
     /**
-     * @var int $_file_count 첨부파일수
+     * @var int $_files 첨부파일수
      */
-    private int $_file_count;
+    private int $_files;
+
+    /**
+     * @var string $_image 대표이미지
+     */
+    private ?\modules\attachment\dtos\Attachment $_image = null;
 
     /**
      * @var int $_created_at 게시물 등록일시
@@ -83,9 +88,34 @@ class Post
     private int $_created_at;
 
     /**
+     * @var int $_hit 조회수
+     */
+    private int $_hit;
+
+    /**
+     * @var string $_ip 작성자IP
+     */
+    private string $_ip;
+
+    /**
+     * @var bool $_is_notice 공지사항여부
+     */
+    private bool $_is_notice;
+
+    /**
+     * @var bool $_is_anonymity 익명여부
+     */
+    private bool $_is_anonymity;
+
+    /**
      * @var int $_loopnum 게시물 목록에서의 순번
      */
     private int $_loopnum;
+
+    /**
+     * @var string $_url 게시물 목록에서 정의된 게시물 URL
+     */
+    private string $_url;
 
     /**
      * 게시물 구조체를 정의한다.
@@ -104,14 +134,19 @@ class Post
         $this->_title = $post->title;
         $this->_member_id = $post->member_id;
 
-        $this->_ment_count = intval($post->ment_count);
-        $this->_latest_ment_at = intval($post->latest_ment_at);
+        $this->_ments = intval($post->ments);
+        $this->_latest_ment = intval($post->latest_ment);
         $this->_good = intval($post->good);
         $this->_bad = intval($post->bad);
 
-        $this->_file_count = intval($post->file_count);
+        $this->_files = intval($post->files);
 
         $this->_created_at = intval($post->created_at);
+        $this->_hit = intval($post->hit);
+        $this->_ip = $post->ip;
+
+        $this->_is_notice = $post->is_notice !== 'FALSE';
+        $this->_is_anonymity = $post->is_anonymity == 'TRUE';
     }
 
     /**
@@ -167,34 +202,53 @@ class Post
     /**
      * 작성자 정보를 가져온다.
      *
-     * @return \modules\member\dto\Member $author
+     * @return \modules\board\dtos\Author $author
      */
-    public function getAuthor(): \modules\member\dtos\Member
+    public function getAuthor(): \modules\board\dtos\Author
     {
         if (isset($this->_author) == true) {
             return $this->_author;
         }
 
-        /**
-         * @var \modules\member\Member $mMember 회원모듈
-         */
-        $mMember = \Modules::get('member');
-        $this->_author = $mMember->getMember($this->_member_id);
-
-        if ($this->_member_id == 0) {
-        }
+        $this->_author = new \modules\board\dtos\Author(
+            $this->_member_id,
+            $this->_ip,
+            $this->_post->name,
+            $this->_post->email,
+            $this->_is_anonymity
+        );
 
         return $this->_author;
     }
 
     /**
-     * 게시물 등록일시를 가져온다.
+     * 등록일시를 가져온다.
      *
-     * @return int $created_at;
+     * @param ?string $format - 날짜포맷 (NULL인 경우 UNIXTIME)
+     * @param ?string $today_format - 등록일시가 오늘날짜인 경우 날짜포맷 (NULL 인 경우 $format 을 따른다)
+     * @return int|string $created_at
      */
-    public function getCreatedAt(): int
+    public function getCreatedAt(?string $format = null, ?string $today_format = null): int|string
     {
-        return $this->_created_at;
+        if ($format === null) {
+            return $this->_created_at;
+        }
+
+        if ($today_format !== null && date('Ymd', $this->_created_at) == date('Ymd')) {
+            return \Format::date($today_format, $this->_created_at);
+        }
+
+        return \Format::date($format, $this->_created_at);
+    }
+
+    /**
+     * 조회수를 가져온다.
+     *
+     * @return int $hit
+     */
+    public function getHit(): int
+    {
+        return $this->_hit;
     }
 
     /**
@@ -207,7 +261,7 @@ class Post
     {
         switch ($type) {
             case 'ment':
-                return $this->_ment_count;
+                return $this->_ments;
 
             case 'good':
                 return $this->_good;
@@ -227,19 +281,39 @@ class Post
      *
      * @return int $latest_ment_at
      */
-    public function getLatestMentAt(): int
+    public function getLatestMent(): int
     {
-        return $this->_latest_ment_at;
+        return $this->_latest_ment;
     }
 
     /**
      * 첨부파일이 존재하는지 확인한다.
      *
-     * @return bool $has_file
+     * @return bool $files
      */
     public function hasFile(): bool
     {
-        return $this->_file_count > 0;
+        return $this->_files > 0;
+    }
+
+    /**
+     * 공지사항 여부를 가져온다.
+     *
+     * @return bool $is_notice
+     */
+    public function isNotice(): bool
+    {
+        return $this->_is_notice;
+    }
+
+    /**
+     * 익명게시물 여부를 가져온다.
+     *
+     * @return bool _is_anonymity
+     */
+    public function isAnonymity(): bool
+    {
+        return $this->_is_anonymity;
     }
 
     /**
@@ -265,12 +339,28 @@ class Post
     }
 
     /**
+     * 목록에서 URL 을 지정한다.
+     *
+     * @param string $url
+     * @return Post $this
+     */
+    public function setUrl(string $url): Post
+    {
+        $this->_url = $url;
+        return $this;
+    }
+
+    /**
      * 게시물 URL 을 가져온다.
      *
      * @return string $url
      */
     public function getUrl(): string
     {
+        if (isset($this->_url) == true) {
+            return $this->_url;
+        }
+
         /**
          * 게시물의 카테고리가 없는 경우, 게시판 URL 을 통해 게시물 URL 을 가져오고,
          * 카테고리가 있는 경우 해당 카테고리를 가진 컨텍스트가 존재여부를 확인한다.
