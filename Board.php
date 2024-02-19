@@ -7,7 +7,7 @@
  * @file /modules/board/Board.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2024. 2. 14.
+ * @modified 2024. 2. 19.
  */
 namespace modules\board;
 class Board extends \Module
@@ -184,20 +184,20 @@ class Board extends \Module
      * @param ?object $configs 컨텍스트 설정
      * @return string $html
      */
-    public function getContent(string $board_id, ?object $configs = null): string
+    public function getContext(string $board_id, ?object $configs = null): string
     {
         $board = $this->getBoard($board_id);
         if ($board === null) {
-            return \ErrorHandler::get('NOT_FOUND_BOARD', $board_id);
+            return \ErrorHandler::get($this->error('NOT_FOUND_BOARD', $board_id));
         }
 
         /**
          * 컨텍스트 템플릿을 설정한다.
          */
-        if ($configs?->template == null || $configs?->template == '#') {
-            $this->setTemplate($board->getTemplateConfigs());
-        } else {
+        if (isset($configs?->template) == true && $configs->template->name !== '#') {
             $this->setTemplate($configs->template);
+        } else {
+            $this->setTemplate($board->getTemplateConfigs());
         }
 
         $content = '';
@@ -209,18 +209,18 @@ class Board extends \Module
                 break;
 
             case 'view':
-                //				$content.= $this->getViewContext($board_id,$configs);
+                $content .= $this->getViewContext($board_id, $configs);
                 break;
 
             case 'write':
-                $content .= $this->getWriteContent($board_id, $configs);
+                $content .= $this->getWriteContext($board_id, $configs);
                 break;
 
             default:
                 $content .= \ErrorHandler::get($this->error('NOT_FOUND_CONTEXT'));
         }
 
-        return $content;
+        return $this->getTemplate()->getLayout($content);
     }
 
     /**
@@ -254,71 +254,21 @@ class Board extends \Module
         }
 
         /**
-         * 게시판의 공지사항 출력설정에 따라 공지사항 게시물을 가져온다.
-         *
-         * INCLUDE : 일반 게시물에 공지사항을 포함하여 페이징처리
-         * FIRST : 첫페이지에만 표시
-         * ALL : 전체 페이지에 노출
+         * 모든 페이지에 고정되는 공지사항을 가져온다.
          */
-        if ($board->getNoticeType() == 'INCLUDE') {
-            /**
-             * 현재 페이지에 표시할 공지사항이 있는 경우, 공지사항 게시물을 현재 페이지에 맞게 가져온다.
-             */
-            if ($board->getLimit('post') * ($p - 1) <= $board->getCount('notice')) {
-                /**
-                 * 공지사항 게시물 범위
-                 */
-                $start = $board->getLimit('post') * ($p - 1);
-                $limit = min(
-                    $board->getLimit('post'),
-                    $board->getCount('notice') - $board->getLimit('post') * ($p - 1)
-                );
-                $notices = $this->db()
-                    ->select()
-                    ->from($this->table('posts'))
-                    ->where('board_id', $board_id)
-                    ->where('is_notice', 'TRUE')
-                    ->orderBy('created_at', 'desc')
-                    ->limit($start, $limit)
-                    ->get();
-
-                /**
-                 * 일반 게시물을 가져올 범위
-                 */
-                $start = 0;
-                $limit = $board->getLimit('post') - $limit;
-            } else {
-                $notices = [];
-
-                /**
-                 * 일반 게시물을 가져올 범위
-                 * 원래 가져와야하는 게시물의 범위에서 공지사항 게시물 갯수만큼 범위를 조절한다.
-                 */
-                $start = $board->getLimit('post') * ($p - 1) - $board->getCount('notice');
-                $limit = $board->getLimit('post');
-            }
-        } else {
-            /**
-             * 첫페이지거나, 모든 페이지에 공지사항을 가져오도록 설정된 경우 공지사항 게시물을 가져온다.
-             */
-            if ($board->getNoticeType() == 'ALL' || $p === 1) {
-                $notices = $this->db()
-                    ->select()
-                    ->from($this->table('posts'))
-                    ->where('board_id', $board_id)
-                    ->where('is_notice', 'TRUE')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-            } else {
-                $notices = [];
-            }
-
-            /**
-             * 일반 게시물을 가져올 범위
-             */
-            $start = ($p - 1) * $board->getLimit('post');
-            $limit = $board->getLimit('post');
+        $notices = $this->db()
+            ->select()
+            ->from($this->table('posts'))
+            ->where('board_id', $board_id)
+            ->where('is_notice', 'FIXED')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        foreach ($notices as &$notice) {
+            $notice = $this->getPost($notice)->setUrl(\Router::get()->getUrl() . '/view/' . $notice->post_id);
         }
+
+        $start = ($p - 1) * $board->getLimit('post');
+        $limit = $board->getLimit('post');
 
         /**
          * 일반 게시물을 가져온다.
@@ -329,32 +279,22 @@ class Board extends \Module
             ->select()
             ->from($this->table('posts'))
             ->where('board_id', $board_id)
-            ->where('is_notice', 'FALSE');
+            ->where('is_notice', 'FIXED', '!=');
         if ($category_id !== null) {
             $posts->where('category_id', $category_id);
         }
         $total = $posts->copy()->count();
         $posts = $posts
             ->limit($start, $limit)
+            ->orderBy('is_notice', 'asc')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        foreach ($notices as &$notice) {
-            $notice = $this->getPost($notice);
-        }
-
         $loopnum = $total - $start;
         foreach ($posts as $idx => &$post) {
-            $post = $this->getPost($post);
-            $post->setLoopnum($loopnum - $idx);
-        }
-
-        /**
-         * 페이지 네비게이션을 가져온다.
-         * 공지사항 출력방식이 INCLUDE 인 경우, 게시물 갯수에 공지사항 갯수를 더한다.
-         */
-        if ($board->getNoticeType() == 'INCLUDE') {
-            $total = $total + $board->getCount('notice');
+            $post = $this->getPost($post)
+                ->setLoopnum($loopnum - $idx)
+                ->setUrl(\Router::get()->getUrl() . '/view/' . $post->post_id);
         }
         // todo: 페이징 네비게이션 구현
 
@@ -362,7 +302,7 @@ class Board extends \Module
          * 템플릿파일을 호출한다.
          */
         $header = \Html::tag('<form id="ModuleBoardListForm">');
-        $footer = \Html::tag('</form>'); //, '<script>Board.list.init("ModuleBoardListForm");</script>');
+        $footer = \Html::tag('</form>');
 
         return $this->getTemplate()
             ->assign([
@@ -374,7 +314,19 @@ class Board extends \Module
                 'category_id' => $category_id,
                 'post_id' => $post_id,
             ])
-            ->getLayout('list', $header, $footer);
+            ->getContext('list', $header, $footer);
+    }
+
+    /**
+     * 게시물 보기 콘텐츠를 가져온다.
+     *
+     * @param string $board_id 게시판고유값
+     * @param ?object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
+     * @return string $content 컨텍스트 HTML
+     */
+    public function getViewContext(string $board_id, ?object $configs = null): string
+    {
+        return '';
     }
 
     /**
@@ -384,11 +336,11 @@ class Board extends \Module
      * @param ?object $configs 사이트맵 관리를 통해 설정된 페이지 컨텍스트 설정
      * @return string $content 컨텍스트 HTML
      */
-    public function getWriteContent(string $board_id, ?object $configs = null): string
+    public function getWriteContext(string $board_id, ?object $configs = null): string
     {
         $board = $this->getBoard($board_id);
         if ($board->checkPermission('POST_WRITE') == false) {
-            return \ErrorHandler::get($this->error('FORBIDDEN', 'LIST'));
+            return \ErrorHandler::get($this->error('FORBIDDEN', 'POST_WRITE'));
         }
 
         /**
@@ -401,12 +353,12 @@ class Board extends \Module
         $post_id = null;
 
         $check = $this->getRouteAt(1);
-        if (preg_match('/^[0-9]+$/', $check) === true) {
+        if ($check !== null && preg_match('/^[0-9]+$/', $check) === true) {
             $post_id = intval($check);
         }
 
         /**
-         * @var \modules\member\Module $mMember 회원모듈
+         * @var \modules\member\Member $mMember
          */
         $mMember = \Modules::get('member');
         $member = $mMember->getMember();
@@ -422,22 +374,34 @@ class Board extends \Module
                 return \ErrorHandler::get($this->error('NOT_FOUND_POST'));
             }
 
-            if ($board->checkPermission('POST_MODIFY') == false && $post->getAuthor()->getId() != $member->getId()) {
-                return \ErrorHandler::get($this->error('FORBIDDEN', 'POST_MODIFY'));
+            if ($board->checkPermission('POST_EDIT') == false && $post->getAuthor()->getId() != $member->getId()) {
+                return \ErrorHandler::get($this->error('FORBIDDEN', 'POST_EDIT'));
             }
         }
 
         /**
-         * @var \modules\wysiwyg\Module $mWysiwyg 위지윅모듈
+         * @var \modules\attachment\Attachment $mAttachment
+         */
+        $mAttachment = \Modules::get('attachment');
+        $uploader = $mAttachment->getUploader()->setName('attachments');
+
+        /**
+         * @var \modules\wysiwyg\Wysiwyg $mWysiwyg
          */
         $mWysiwyg = \Modules::get('wysiwyg');
-        $wysiwyg = $mWysiwyg->setName('content');
+        $editor = $mWysiwyg
+            ->getEditor()
+            ->setName('content')
+            ->setUploader($uploader);
 
         /**
          * 템플릿파일을 호출한다.
          */
-        $header = \Html::tag('<form id="ModuleBoardWriteForm">');
-        $footer = \Html::tag('</form>'); //, '<script>Board.write.init("ModuleBoardWriteForm");</script>');
+        $header = \Html::tag(
+            '<form name="ModuleBoardWriteForm" autosave="true">',
+            '<input type="hidden" name="board_id" value="' . $board_id . '">'
+        );
+        $footer = \Html::tag('</form>');
 
         return $this->getTemplate()
             ->assign([
@@ -446,9 +410,9 @@ class Board extends \Module
                 'post_id' => $post_id,
                 'post' => $post,
                 'member' => $member,
-                'wysiwyg' => $wysiwyg,
+                'editor' => $editor,
             ])
-            ->getLayout('write', $header, $footer);
+            ->getContext('write', $header, $footer);
     }
 
     /**
@@ -466,7 +430,7 @@ class Board extends \Module
              * 게시판이 존재하지 않는 경우
              */
             case 'NOT_FOUND_BOARD':
-                $error = \ErrorHandler::data();
+                $error = \ErrorHandler::data($code, $this);
                 $error->message = $this->getErrorText('NOT_FOUND_BOARD', ['board_id' => $message]);
                 return $error;
 
@@ -474,7 +438,7 @@ class Board extends \Module
              * URL 경로가 존재하지 않는 경우
              */
             case 'NOT_FOUND_CONTEXT':
-                $error = \ErrorHandler::data();
+                $error = \ErrorHandler::data($code, $this);
                 $error->message = $this->getErrorText('NOT_FOUND_CONTEXT');
                 $error->suffix = $message;
                 return $error;
@@ -484,7 +448,7 @@ class Board extends \Module
              * 그렇지 않은 경우 권한이 부족하다는 에러메시지를 표시한다.
              */
             case 'FORBIDDEN':
-                $error = \ErrorHandler::data();
+                $error = \ErrorHandler::data($code, $this);
                 /**
                  * @var ModuleMember $mMember
                  */
