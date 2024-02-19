@@ -39,5 +39,280 @@
                 }
             }
         }
+    },
+    "databases": {
+        "boards": {
+            "columns": {
+                "board_id": {
+                    "type": "varchar",
+                    "length": 20,
+                    "comment": "게시판고유값"
+                },
+                "title": {
+                    "type": "varchar",
+                    "length": 100,
+                    "comment": "게시판명"
+                },
+                "template": {
+                    "type": "json",
+                    "comment": "템플릿설정"
+                },
+                "post_limit": {
+                    "type": "int",
+                    "default": 20,
+                    "comment": "페이지당게시물"
+                },
+                "ment_limit": {
+                    "type": "int",
+                    "default": 20,
+                    "comment": "페이지당댓글"
+                },
+                "pagination_limit": {
+                    "type": "int",
+                    "default": 10,
+                    "comment": "페이징링크수"
+                },
+                "pagination_type": {
+                    "type": "enum",
+                    "length": "'LEFT','CENTER'",
+                    "default": "LEFT",
+                    "comment": "페이징정렬방식"
+                },
+                "posts": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "게시물수"
+                },
+                "ments": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "댓글수"
+                },
+                "posted_at": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "최근게시물등록일시"
+                },
+                "allow_secret": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "TRUE",
+                    "comment": "비밀글허용여부"
+                },
+                "allow_anonymity": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "TRUE",
+                    "comment": "비밀글허용여부"
+                },
+                "allow_vote": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "TRUE",
+                    "comment": "비밀글허용여부"
+                },
+                "permissions": {
+                    "type": "json",
+                    "is_null": true,
+                    "comment": "권한설정"
+                }
+            },
+            "indexes": {
+                "board_id": "primary_key"
+            },
+            "comment": "아이모듈 게시판"
+        },
+        "posts": {
+            "columns": {
+                "post_id": {
+                    "type": "int",
+                    "comment": "게시물고유값"
+                },
+                "board_id": {
+                    "type": "varchar",
+                    "length": 20,
+                    "comment": "게시판고유값"
+                },
+                "category_id": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "카테고리고유값"
+                },
+                "member_id": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "회원고유값"
+                },
+                "name": {
+                    "type": "varchar",
+                    "length": 20,
+                    "is_null": true,
+                    "comment": "작성자명"
+                },
+                "password": {
+                    "type": "char",
+                    "length": 65,
+                    "is_null": true,
+                    "comment": "게시물패스워드"
+                },
+                "email": {
+                    "type": "varchar",
+                    "length": 100,
+                    "is_null": true,
+                    "comment": "작성자이메일주소"
+                },
+                "prefix_id": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "게시물말머리고유값"
+                },
+                "title": {
+                    "type": "varchar",
+                    "length": 255,
+                    "comment": "제목"
+                },
+                "content": {
+                    "type": "longtext",
+                    "comment": "내용"
+                },
+                "search": {
+                    "type": "text",
+                    "comment": "내용인덱스"
+                },
+                "field1": {
+                    "type": "varchar",
+                    "length": 255,
+                    "is_null": true,
+                    "comment": "추가필드1"
+                },
+                "field2": {
+                    "type": "varchar",
+                    "length": 255,
+                    "is_null": true,
+                    "comment": "추가필드2"
+                },
+                "field3": {
+                    "type": "varchar",
+                    "length": 255,
+                    "is_null": true,
+                    "comment": "추가필드3"
+                },
+                "field4": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "추가필드4(숫자)"
+                },
+                "field5": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "추가필드5(숫자)"
+                },
+                "field6": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "추가필드6(숫자)"
+                },
+                "image": {
+                    "type": "char",
+                    "length": 36,
+                    "is_null": true,
+                    "comment": "대표이미지 첨부파일고유값"
+                },
+                "created_at": {
+                    "type": "int",
+                    "comment": "등록시각"
+                },
+                "updated_at": {
+                    "type": "int",
+                    "comment": "최종수정시각"
+                },
+                "updated_by": {
+                    "type": "int",
+                    "default": 0,
+                    "comment": "최종수정 회원고유값"
+                },
+                "ip": {
+                    "type": "varchar",
+                    "length": 15,
+                    "is_null": true,
+                    "comment": "작성자IP주소"
+                },
+                "hit": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "조회수"
+                },
+                "ments": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "댓글수"
+                },
+                "files": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "첨부파일수"
+                },
+                "latest_ment": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "최종작성댓글일"
+                },
+                "good": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "추천수"
+                },
+                "bad": {
+                    "type": "int",
+                    "length": 11,
+                    "default": 0,
+                    "comment": "비추천수"
+                },
+                "is_notice": {
+                    "type": "enum",
+                    "length": "'FIXED','TRUE','FALSE'",
+                    "default": "FALSE",
+                    "comment": "공지여부"
+                },
+                "is_html_title": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "FALSE",
+                    "comment": "HTML제목사용여부"
+                },
+                "is_secret": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "FALSE",
+                    "comment": "비밀글여부"
+                },
+                "is_anonymity": {
+                    "type": "enum",
+                    "length": "'TRUE','FALSE'",
+                    "default": "FALSE",
+                    "comment": "익명여부"
+                },
+                "extra": {
+                    "type": "text",
+                    "is_null": true,
+                    "comment": "게시물추가정보"
+                }
+            },
+            "indexes": {
+                "post_id": "primary_key",
+                "board_id": "index",
+                "category_id,board_id": "index",
+                "member_id": "index",
+                "name": "index",
+                "title,search": "fulltext"
+            },
+            "auto_increment": "post_id",
+            "comment": "아이모듈 게시판 게시물"
+        }
     }
 }
