@@ -38,9 +38,14 @@ class Post
     private int $_prefix_id;
 
     /**
-     * @var string $title 게시물 제목
+     * @var string $_title 게시물 제목
      */
     private string $_title;
+
+    /**
+     * @var string $_content 게시물 본문
+     */
+    private string $_content;
 
     /**
      * @var int $_member_id 작성자 회원고유값
@@ -98,14 +103,19 @@ class Post
     private string $_ip;
 
     /**
-     * @var bool $_is_notice 공지사항여부
+     * @var string $_is_notice 공지사항여부
      */
-    private bool $_is_notice;
+    private string $_is_notice;
 
     /**
      * @var bool $_is_anonymity 익명여부
      */
     private bool $_is_anonymity;
+
+    /**
+     * @var bool $_is_secret 비밀글 여부
+     */
+    private bool $_is_secret;
 
     /**
      * @var int $_loopnum 게시물 목록에서의 순번
@@ -132,6 +142,7 @@ class Post
         $this->_prefix_id = $post->prefix_id;
 
         $this->_title = $post->title;
+        $this->_content = $post->content;
         $this->_member_id = $post->member_id;
 
         $this->_ments = intval($post->ments);
@@ -145,8 +156,9 @@ class Post
         $this->_hit = intval($post->hit);
         $this->_ip = $post->ip;
 
-        $this->_is_notice = $post->is_notice !== 'FALSE';
+        $this->_is_notice = $post->is_notice;
         $this->_is_anonymity = $post->is_anonymity == 'TRUE';
+        $this->_is_secret = $post->is_secret == 'TRUE';
     }
 
     /**
@@ -197,6 +209,40 @@ class Post
     public function getTitle(): string
     {
         return $this->_title;
+    }
+
+    /**
+     * 게시물 본문을 가져온다.
+     *
+     * @param bool $is_full_url 전체 URL 으로 가져올지 여부
+     * @return string $content
+     */
+    public function getContent(bool $is_full_url = false): string
+    {
+        /**
+         * @var \modules\wysiwyg\Wysiwyg $mWysiwyg
+         */
+        $mWysiwyg = \Modules::get('wysiwyg');
+
+        return \Html::element(
+            'div',
+            ['data-role' => 'wysiwyg-content'],
+            $mWysiwyg->getViewerContent($this->_content, true, $is_full_url)
+        );
+    }
+
+    /**
+     * 에디터 편집을 위한 게시물 본문을 가져온다.
+     *
+     * @return string $content
+     */
+    public function getEditorContent(): string
+    {
+        /**
+         * @var \modules\wysiwyg\Wysiwyg $mWysiwyg
+         */
+        $mWysiwyg = \Modules::get('wysiwyg');
+        return $mWysiwyg->getViewerContent($this->_content);
     }
 
     /**
@@ -299,21 +345,46 @@ class Post
     /**
      * 공지사항 여부를 가져온다.
      *
+     * @param bool $is_included_fixed 고정 공지사항 포함여부
      * @return bool $is_notice
      */
-    public function isNotice(): bool
+    public function isNotice($is_included_fixed = true): bool
     {
-        return $this->_is_notice;
+        if ($is_included_fixed == true) {
+            return $this->_is_notice != 'FALSE';
+        } else {
+            return $this->_is_notice == 'TRUE';
+        }
+    }
+
+    /**
+     * 고정된 공지사항 여부를 가져온다.
+     *
+     * @return bool $is_fixed
+     */
+    public function isFixed(): bool
+    {
+        return $this->_is_notice == 'FIXED';
     }
 
     /**
      * 익명게시물 여부를 가져온다.
      *
-     * @return bool _is_anonymity
+     * @return bool $is_anonymity
      */
     public function isAnonymity(): bool
     {
         return $this->_is_anonymity;
+    }
+
+    /**
+     * 비공개 여부를 가져온다.
+     *
+     * @return bool $is_anonymity
+     */
+    public function isSecret(): bool
+    {
+        return $this->_is_secret;
     }
 
     /**
