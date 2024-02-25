@@ -56,6 +56,35 @@ class Author
     }
 
     /**
+     * 작성자명을 가져온다.
+     *
+     * @return string $name
+     */
+    public function getName(): string
+    {
+        if ($this->_member_id == 0) {
+            return $this->_name ?? 'NONAME';
+        } else {
+            /**
+             * @var \modules\member\Member $mMember
+             */
+            $mMember = \Modules::get('member');
+
+            return $mMember->getMember($this->_member_id)->getDisplayName(false);
+        }
+    }
+
+    /**
+     * 작성자명을 가져온다.
+     *
+     * @return string $name
+     */
+    public function getEmail(): string
+    {
+        return $this->_email ?? '';
+    }
+
+    /**
      * 회원여부를 확인한다.
      *
      * @return bool $is_member
