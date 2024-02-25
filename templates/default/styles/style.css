@@ -85,4 +85,13 @@ div[data-role='module'][data-module='board'][data-template='default'] {
             }
         }
     }
+
+    article[data-type='post'] {
+        border-top: 2px solid #222;
+        border-bottom: 1px solid var(--color-background-100);
+
+        div[data-role='wysiwyg-content'] {
+            padding: var(--gap-content) 0;
+        }
+    }
 }

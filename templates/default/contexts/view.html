@@ -1,0 +1,29 @@
+<?php
+/**
+ * 이 파일은 아이모듈 게시판모듈의 일부입니다. (https://www.imodules.io)
+ *
+ * 기본 템플릿 - 게시물작성
+ *
+ * @file /modules/board/templates/default/contexts/view.html
+ * @author Arzz <arzz@arzz.com>
+ * @license MIT License
+ * @modified 2024. 2. 19.
+ *
+ * @var \modules\board\Board $me
+ * @var \modules\board\dtos\Post $post 게시물 정보
+ */
+if (defined('__IM__') == false) {
+    exit();
+}
+?>
+<article data-type="post">
+    <h4><?php echo $post->getTitle(); ?></h4>
+    
+    <?php echo $post->getContent(); ?>
+</article>
+
+<div data-role="buttons">
+    <a href="<?php echo $me->getUrl('list',1); ?>" data-role="button"><?php echo $me->getText('buttons.list'); ?></a>
+    <span data-role="space"></span>
+    <a href="<?php echo $me->getUrl('write',$post->getId()); ?>" data-role="button"><?php echo $me->getText('buttons.edit'); ?></a>
+</div>

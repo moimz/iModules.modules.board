@@ -31,7 +31,7 @@ if (defined('__IM__') == false) {
     <li>
         <label><?php echo $me->getText('posts.author'); ?></label>
         <div>
-            <?php Form::input('name')->required(true)->doLayout(); ?>
+            <?php Form::input('name')->value($post?->getAuthor()->getName())->required(true)->doLayout(); ?>
         </div>
     </li>
     <li>
@@ -43,14 +43,14 @@ if (defined('__IM__') == false) {
     <li>
         <label><?php echo $me->getText('posts.email'); ?></label>
         <div>
-            <?php Form::input('email', 'email')->doLayout(); ?>
+            <?php Form::input('email', 'email')->value($post?->getAuthor()->getEmail())->doLayout(); ?>
         </div>
     </li>
     <?php } ?>
     <li>
         <label><?php echo $me->getText('posts.title'); ?></label>
         <div>
-            <?php Form::input('title')->required(true)->doLayout(); ?>
+            <?php Form::input('title')->value($post?->getTitle())->required(true)->doLayout(); ?>
             <?php Form::check('is_html_title', 'TRUE', $me->getText('posts.is_html_title'))->doLayout(); ?>
         </div>
     </li>
@@ -63,15 +63,15 @@ if (defined('__IM__') == false) {
     <li>
         <label><?php echo $me->getText('write.options'); ?></label>
         <div>
-            <?php Form::check('is_fixed', 'TRUE', $me->getText('write.is_fixed'))->doLayout(); ?>
-            <?php Form::check('is_notice', 'TRUE', $me->getText('write.is_notice'))->doLayout(); ?>
-            <?php Form::check('is_anonymity', 'TRUE', $me->getText('write.is_anonymity'))->doLayout(); ?>
-            <?php Form::check('is_secret', 'TRUE', $me->getText('write.is_secret'))->doLayout(); ?>
+            <?php Form::check('is_fixed', 'TRUE', $me->getText('write.is_fixed'))->checked($post?->isFixed() ?? false)->doLayout(); ?>
+            <?php Form::check('is_notice', 'TRUE', $me->getText('write.is_notice'))->checked($post?->isNotice(false) ?? false)->doLayout(); ?>
+            <?php Form::check('is_anonymity', 'TRUE', $me->getText('write.is_anonymity'))->checked($post?->isAnonymity() ?? false)->doLayout(); ?>
+            <?php Form::check('is_secret', 'TRUE', $me->getText('write.is_secret'))->checked($post?->isSecret() ?? false)->doLayout(); ?>
         </div>
     </li>
 </ul>
 
 <div data-role="buttons">
-    <a href="<?php echo $me->getUrl('list', 1); ?>" data-role="button"><?php echo $me->getText('buttons.cancel'); ?></a>
+    <a href="<?php echo $post === null ? $me->getUrl('list', 1) : $me->getUrl('view', $post->getId()); ?>" data-role="button"><?php echo $me->getText('buttons.cancel'); ?></a>
     <button type="submit" data-role="button"><?php echo $me->getText('buttons.submit'); ?></button>
 </div>

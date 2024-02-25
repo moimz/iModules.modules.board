@@ -7,7 +7,7 @@
  * @file /modules/board/Board.php
  * @author Arzz <arzz@arzz.com>
  * @license MIT License
- * @modified 2024. 2. 19.
+ * @modified 2024. 2. 25.
  */
 namespace modules\board;
 class Board extends \Module
@@ -326,7 +326,36 @@ class Board extends \Module
      */
     public function getViewContext(string $board_id, ?object $configs = null): string
     {
-        return '';
+        $board = $this->getBoard($board_id);
+        if ($board->checkPermission('VIEW') == false) {
+            return \ErrorHandler::get($this->error('FORBIDDEN', 'VIEW'));
+        }
+
+        $post_id = $this->getRouteAt(1);
+        if ($post_id == null) {
+            return \ErrorHandler::get($this->error('NOT_FOUND_URL'));
+        }
+
+        $post = $this->getPost($post_id);
+        if ($post == null) {
+            return \ErrorHandler::get($this->error('NOT_FOUND_POST'));
+        }
+
+        /**
+         * 메타 설정
+         */
+        \Html::title($post->getTitle());
+        // @todo 이미지, 설명, OG 태그 등
+
+        $header = $footer = '';
+
+        return $this->getTemplate()
+            ->assign([
+                'board' => $board,
+                'post_id' => $post_id,
+                'post' => $post,
+            ])
+            ->getContext('view', $header, $footer);
     }
 
     /**
@@ -352,9 +381,11 @@ class Board extends \Module
         $category_id = $category_id === 0 ? null : $category_id;
         $post_id = null;
 
-        $check = $this->getRouteAt(1);
-        if ($check !== null && preg_match('/^[0-9]+$/', $check) === true) {
-            $post_id = intval($check);
+        $post_id = $this->getRouteAt(1);
+        if ($post_id !== null) {
+            $post = $this->getPost($post_id);
+        } else {
+            $post = null;
         }
 
         /**
@@ -374,7 +405,8 @@ class Board extends \Module
                 return \ErrorHandler::get($this->error('NOT_FOUND_POST'));
             }
 
-            if ($board->checkPermission('POST_EDIT') == false && $post->getAuthor()->getId() != $member->getId()) {
+            // @todo 작성자 권한 확인
+            if ($board->checkPermission('POST_EDIT') == false) {
                 return \ErrorHandler::get($this->error('FORBIDDEN', 'POST_EDIT'));
             }
         }
@@ -392,6 +424,7 @@ class Board extends \Module
         $editor = $mWysiwyg
             ->getEditor()
             ->setName('content')
+            ->setContent($post?->getEditorContent() ?? null)
             ->setUploader($uploader);
 
         /**
