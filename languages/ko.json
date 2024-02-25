@@ -1,4 +1,30 @@
 {
+    "buttons": {
+        "submit": "등록하기",
+        "write": "게시물작성",
+        "list": "목록보기",
+        "edit": "수정하기",
+        "cancel": "취소"
+    },
+    "posts": {
+        "loopnum": "순번",
+        "author": "작성자",
+        "password": "패스워드",
+        "email": "이메일주소",
+        "title": "제목",
+        "is_html_title": "제목에 HTML 태그를 사용합니다.",
+        "content": "본문",
+        "created_at": "작성일",
+        "author": "작성자",
+        "hit": "조회수"
+    },
+    "write": {
+        "options": "게시물옵션",
+        "is_fixed": "모든 페이지 상단에 고정되는 공지사항 게시물로 등록합니다.",
+        "is_notice": "첫페이지 상단에 고정되는 공지사항 게시물로 등록합니다.",
+        "is_anonymity": "익명으로 등록합니다.",
+        "is_secret": "관리자 및 본인만 볼 수 있는 비공개 게시물로 설정합니다."
+    },
     "search": {
         "title": "제목",
         "content": "제목+내용",
